@@ -1,7 +1,8 @@
-import {useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import CategoryBar from "./components/CategoryBar";
-import GameModal from "./components/GameModal"
+import GameCard from "./components/GameCard";
+import GameModal from "./components/GameModal";
 
 const API_KEY = import.meta.env.VITE_RAWG_API_KEY;
 
@@ -17,7 +18,9 @@ function App() {
       setLoading(true);
 
       try {
-        const url = new URL("https://api.rawg.io/api/games");
+        const url = new URL(
+          "https://api.rawg.io/api/games"
+        );
 
         url.searchParams.set("key", API_KEY);
         url.searchParams.set("page_size", "30");
@@ -41,7 +44,7 @@ function App() {
 
         setGames(data.results || []);
       } catch (error) {
-        console.error(error);
+        console.error("RAWG Error:", error);
         setGames([]);
       } finally {
         setLoading(false);
@@ -53,37 +56,164 @@ function App() {
 
   return (
     <div className="app">
-      <header 
-      search={search}
-      setSearch={setSearch}
+
+      <Header
+        search={search}
+        setSearch={setSearch}
       />
 
       <main>
+
+        {/* HERO */}
+
         <section className="hero">
-          <p className="eyebrow">GAME DISCOVERY</p>
 
-          <h1>Find your next <br /> favorite game.</h1>
+          <div className="hero-content">
 
-          <p>Discover games, explore new worlds, and find something you will love.</p>
+            <p className="eyebrow">
+              GAME DISCOVERY
+            </p>
+
+            <h1>
+              Find your next
+              <br />
+              favorite game.
+            </h1>
+
+            <p className="hero-description">
+              Explore thousands of games, discover new worlds,
+              and find something worth playing.
+            </p>
+
+            <a
+              href="#games"
+              className="hero-button"
+            >
+              Explore games
+              <span>↓</span>
+            </a>
+
+          </div>
+
+
+          {games[0] && (
+            <div className="featured-game">
+
+              <img
+                src={games[0].background_image}
+                alt={games[0].name}
+              />
+
+              <div className="featured-gradient"></div>
+
+              <div className="featured-info">
+
+                <span>Featured game</span>
+
+                <h2>
+                  {games[0].name}
+                </h2>
+
+                <p>
+                  ★ {games[0].rating || "N/A"}
+
+                  <span>•</span>
+
+                  {games[0].released || "TBA"}
+                </p>
+
+              </div>
+
+            </div>
+          )}
+
         </section>
 
-        <CategoryBar
-         category={category}
-         setCategory
-         />
 
-         <section className="games-section">
-          <div className="section-title">
+        {/* DISCOVER */}
+
+        <section
+          className="discover"
+          id="games"
+        >
+
+          <div className="section-heading">
+
             <div>
-              <h2>Explore games</h2>
-              <p>Discover something new.</p>
+
+              <p className="eyebrow">
+                EXPLORE
+              </p>
+
+              <h2>
+                Discover games
+              </h2>
+
             </div>
 
-            
+            <span className="results-count">
+              {games.length} games
+            </span>
+
           </div>
-         </section>
+
+
+          <CategoryBar
+            category={category}
+            setCategory={setCategory}
+          />
+
+
+          {loading ? (
+
+            <div className="loading">
+              Loading games...
+            </div>
+
+          ) : games.length === 0 ? (
+
+            <div className="loading">
+              No games found.
+            </div>
+
+          ) : (
+
+            <div className="game-grid">
+
+              {games.map((game) => (
+
+                <GameCard
+                  key={game.id}
+                  game={game}
+                  onClick={() =>
+                    setSelectedGame(game)
+                  }
+                />
+
+              ))}
+
+            </div>
+
+          )}
+
+        </section>
+
       </main>
+
+
+      {/* GAME MODAL */}
+
+      {selectedGame && (
+        <GameModal
+          game={selectedGame}
+          onClose={() =>
+            setSelectedGame(null)
+          }
+        />
+      )}
+
     </div>
-  )
-  })
+  );
 }
+
+export default App;
